@@ -49,7 +49,7 @@ const verifyToken = async (req, res, next) => {
     if (err) {
       return res.status(500).json({ message: 'Failed to authenticate token.' });
     }
-   const user = await User.findOne({ id: decoded.id })
+   const user = await User.findOne({ _id: decoded.id })
    req.userId = user._id;
    req.userRole = user.userRole;
    next();
