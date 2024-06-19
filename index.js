@@ -73,7 +73,7 @@ app.post('/login', async(req, res) => {
 // Logged in API
 app.get('/loggedin', verifyToken, (req, res) => {
   const newToken = jwt.sign({ id: req.userId }, SECRET_KEY, { expiresIn: '1h' });
-  res.json({ token: newToken });
+  res.status(200).json({ token: newToken });
 });
 
 // Waitlist section
