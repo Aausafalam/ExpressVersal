@@ -3,8 +3,9 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid'); // UUID package
-
+const cors = require('cors');
 const app = express();
+app.use(cors())
 app.use(bodyParser.json());
 
 const SECRET_KEY = '54545v5rdfd4e5egfef434fefsxw3w35vfgfdaw2367tg543fe4'; // Change this to a more secure key in production
