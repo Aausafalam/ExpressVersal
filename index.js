@@ -50,7 +50,7 @@ const verifyToken = async (req, res, next) => {
       return res.status(500).json({ message: 'Failed to authenticate token.' });
     }
    const user = await User.findOne({ id: decoded.id })
-   req.userId = user.id;
+   req.userId = user._id;
    req.userRole = user.userRole;
    next();
 
@@ -60,9 +60,14 @@ const verifyToken = async (req, res, next) => {
 // Login API
 app.post('/login', async(req, res) => {
   const { email, password } = req.body;
- const user =  await User.findOne({ email, password });
-  const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
-   return  res.json({ token, message: 'login successful' });
+ try {
+    const user =  await User.findOne({ email, password });
+    if(!user) return res.status(404).json({ message: 'user not found' });
+  const token = jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '1h' });
+   return  res.status(200).json({ token, message: 'login successful' });
+ } catch (error) {
+    return res.status(500).json({ error: error})
+ }
 });
 
 // Logged in API
