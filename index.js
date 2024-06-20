@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid'); // UUID package
 const cors = require('cors');
+const cron = require('node-cron');
 const app = express();
 app.use(cors())
 app.use(bodyParser.json());
@@ -35,9 +36,17 @@ const contactSchema = new mongoose.Schema({
   Mobile: String
 });
 
+const counterSchema = new mongoose.Schema({
+  count: { type: Number, default: 400 }
+});
+
+
+
+
 const User = mongoose.model('User', userSchema);
 const Waitlist = mongoose.model('Waitlist', waitlistSchema);
 const Contact = mongoose.model('Contact', contactSchema);
+const Counter = mongoose.model('Counter', counterSchema);
 
 // Middleware to verify JWT token
 const verifyToken = async (req, res, next) => {
@@ -133,6 +142,40 @@ app.delete('/contact/:id', verifyToken, (req, res) => {
  return  res.json({ message: 'Contact entry deleted successfully.' });
  
 });
+
+
+
+// Function to increment the counter
+const incrementCounter = async () => {
+  const counter = await Counter.findOne();
+  if (counter) {
+    counter.count += 1;
+    await counter.save();
+  } else {
+    const newCounter = new Counter({ count: 401 });
+    await newCounter.save();
+  }
+  console.log('Counter incremented:', counter ? counter.count : 401);
+};
+
+// Schedule the task to run every half hour
+cron.schedule('*/30 * * * *', incrementCounter);
+
+
+app.get('/counter', async (req, res) => {
+  try {
+    const counter = await Counter.findOne();
+    if (counter) {
+      res.json({ count: counter.count });
+    } else {
+      res.status(404).json({ message: 'Counter not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error });
+  }
+});
+
+incrementCounter()
 
 app.use("/", (req, res) => {
   return res.json({ message: "Hello world" });
